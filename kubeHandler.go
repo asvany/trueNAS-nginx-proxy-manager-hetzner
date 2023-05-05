@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -62,7 +61,7 @@ func GetPodID() string {
 
 	pod := pods.Items[0]
 
-	fmt.Println("Pod name:", pod.Name)
+	log.Println("Pod name:", pod.Name)
 
 	pod_data, err := clientset.CoreV1().Pods(namespace).Get(context.TODO(), pod.Name, metav1.GetOptions{})
 	if err != nil {

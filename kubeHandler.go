@@ -28,7 +28,7 @@ func GetPodID() string {
 	if kubeconfigPath == "" {
 		kubeconfigPath = "/etc/rancher/k3s/k3s.yaml"
 	}
-	log.println("kubeconfig path is: ", kubeconfigPath)
+	log.Println("kubeconfig path is: ", kubeconfigPath)
 
 	if _, err := os.Stat(kubeconfigPath); !os.IsNotExist(err) {
 		config, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath)

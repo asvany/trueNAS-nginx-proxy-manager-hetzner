@@ -106,10 +106,17 @@ func (c *HetznerClient) findRecordDataByName(name string) (string, string, strin
 	return "", "", ""
 }
 
-func (c *HetznerClient) updateRecord(id string, value string, record_type string) {
-	// Update Record (PUT https://dns.hetzner.com/api/v1/records/)
+
+	
+func (c *HetznerClient) createRecord(name string, value string, record_type string) {
+	// Create Record (POST https://dns.hetzner.com/api/v1/records)
 	// Create request
-	req, err := http.NewRequest("PUT", "https://dns.hetzner.com/api/v1/records/"+id, nil)
+
+	json := []byte(fmt.Sprintf(`{"value": "%v" ,"ttl": 86400,"type": "%v" ,"name": "%v","zone_id": "%v"}`, value, record_type, name, c.zone_id))
+	body := bytes.NewBuffer(json)
+
+	// Create request
+	req, err := http.NewRequest("POST", "https://dns.hetzner.com/api/v1/records", body)
 	if err != nil {
 		log.Fatalln("Error on creating request object.\n[ERRO] -", err)
 	}
@@ -117,19 +124,6 @@ func (c *HetznerClient) updateRecord(id string, value string, record_type string
 	// Headers
 	req.Header.Add("Auth-API-Token", c.token)
 	req.Header.Add("Content-Type", "application/json")
-
-	// Body
-	reqBody, err := json.Marshal(map[string]string{
-		"value": value,
-		"type":  record_type,
-	})
-
-	if err != nil {
-		log.Fatalln("Error on marshal.\n[ERRO] -", err)
-	}
-
-	// Attach body to request
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody))
 
 	// Fetch Request
 	resp, err := c.httpClient.Do(req)
@@ -140,26 +134,24 @@ func (c *HetznerClient) updateRecord(id string, value string, record_type string
 
 	defer resp.Body.Close()
 
-	body, _ := ioutil.ReadAll(resp.Body)
+	respBody, _ := ioutil.ReadAll(resp.Body)
 
-	var data map[string]interface{}
-
-	err = json.Unmarshal([]byte(body), &data)
-	if err != nil {
-		log.Fatalln("Error on unmarshal.\n[ERRO] -", err)
-	}
-	fmt.Println(data)
+	// Display Results
+	fmt.Println("response Status : ", resp.Status)
+	fmt.Println("response Headers : ", resp.Header)
+	fmt.Println("response Body : ", string(respBody))
 }
 
-func (c *HetznerClient) createRecord(name string, value string, record_type string) {
-	// Create Record (POST https://dns.hetzner.com/api/v1/records)
+func (c *HetznerClient) updateRecord(id string,name string, value string, record_type string) {
+	// Update Record (PUT https://dns.hetzner.com/api/v1/records/{id})
 	// Create request
+
 
 	json := []byte(fmt.Sprintf(`{"value": "%v" ,"ttl": 86400,"type": "%v" ,"name": "%v","zone_id": "%v"}`, value, record_type, name, c.zone_id))
 	body := bytes.NewBuffer(json)
 
 	// Create request
-	req, err := http.NewRequest("POST", "https://dns.hetzner.com/api/v1/records", body)
+	req, err := http.NewRequest("PUT", "https://dns.hetzner.com/api/v1/records/"+id, body)
 	if err != nil {
 		log.Fatalln("Error on creating request object.\n[ERRO] -", err)
 	}

@@ -51,15 +51,14 @@ func main() {
 		log.Println("RECORD_TYPE environment variable is not set, defaulting to A")
 	}
 
-	ip := "172.31.1.212"
+	ip, status := GetIpAndConnectionStatus()
+	if !status {
+		log.Fatalln("service not ready, exiting")
+	}
+
 	hetznerClient := NewHetznerClient(HETZNER_DNS_TOKEN, ZONE_NAME, HOST_NAME, ip).findZoneID()
 
 	log.Println("Zone ID is: ", hetznerClient.zone_id)
-
-	// ip, status := GetIpAndConnectionStatus()
-	// if status {
-	// 	return
-	// }
 
 	// log.Println("setup ip is: ", ip)
 	record_id, record_ip, record_type := hetznerClient.findRecordDataByName(hetznerClient.host_name)
@@ -74,7 +73,7 @@ func main() {
 		hetznerClient.createRecord(hetznerClient.host_name, ip, RECORD_TYPE)
 	} else {
 		log.Println("record ip is different, updating record")
-		hetznerClient.updateRecord(ip, record_id, record_type)
+		hetznerClient.updateRecord(record_id, hetznerClient.host_name, ip, record_type)
 	}
 
 }
